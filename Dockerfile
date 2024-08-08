@@ -1,4 +1,4 @@
-FROM python:3.9-slim as python-base
+FROM python:3.12-slim as python-base
 
 ENV PYTHONUNBUFFERED=1 \
   \
@@ -32,13 +32,14 @@ RUN apt-get install --no-install-recommends -y \
   build-essential \
   git \
   openssh-server \
+  gnupg \
   && curl -sSL https://install.python-poetry.org | python3
 
 WORKDIR $PYSETUP_PATH
 
 FROM initial as development-base
 ENV POETRY_NO_INTERACTION=1
-COPY pyproject.toml ./
+COPY poetry.lock pyproject.toml ./
 
 FROM development-base as development
 RUN poetry install
@@ -49,7 +50,8 @@ FROM development-base as builder-base
 RUN poetry install --no-dev
 
 FROM python-base as production
-COPY --from=builder-base /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
+COPY --from=builder-base /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY ./main.py /app/main.py
 WORKDIR /app
 
 CMD python main.py
