@@ -1,3 +1,4 @@
+from os import getenv
 from selenium import webdriver
 
 
@@ -23,15 +24,18 @@ class ChromeDriver:
         options.add_argument("--no-default-browser-check")
         # 必須 「session not created: DevToolsActivePort file doesn't exist」と言われる
         options.add_argument('--no-sandbox')
-        # ゾンビプロセスを作らない。プロセスが残るとメモリをくいつぶす
-        options.add_argument('--no-zygote')
         options.add_argument("--propagate-iph-for-testing")
-        # ゾンビプロセスを作らない。プロセスが残るとメモリをくいつぶす
-        options.add_argument('--single-process')
         options.add_argument('--user-agent=selenium')
         options.add_experimental_option(
             "excludeSwitches", ["enable-automation", "enable-logging"]
         )
+
+        # CI環境では'--single-process'を入れるとエラーになる
+        if not getenv('CI'):
+            # ゾンビプロセスを作らない。プロセスが残るとメモリをくいつぶす
+            options.add_argument('--no-zygote')
+            options.add_argument('--single-process')
+
         self.driver = webdriver.Chrome(options=options)
         self.driver.set_window_size(1920, 1080)
         return self.driver
