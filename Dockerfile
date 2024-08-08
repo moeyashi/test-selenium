@@ -51,6 +51,7 @@ RUN poetry install --no-dev
 
 FROM python-base as production
 COPY --from=builder-base /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY ./main.py /app/main.py
 WORKDIR /app
 
 CMD python main.py
